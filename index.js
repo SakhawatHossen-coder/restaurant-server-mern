@@ -33,6 +33,7 @@ async function run() {
     //     await client.connect();
     //start
     const foodCollection = client.db("foodDB").collection("foods");
+    const foodPurchase = client.db("foodDB").collection("foodPurchase");
 
     app.post("/addfood", async (req, res) => {
       const newFood = req.body;
@@ -46,6 +47,17 @@ async function run() {
       res.send(result);
     });
     app.get("/addfood/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodCollection.findOne(query);
+      res.send(result);
+    });
+    app.post("/purchasefood", async (req, res) => {
+      const newFood = req.body;
+      const result = await foodPurchase.insertOne(newFood);
+      res.send(result);
+    });
+    app.get("/purchasefood/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await foodCollection.findOne(query);
