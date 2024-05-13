@@ -34,7 +34,9 @@ async function run() {
     //start
     const foodCollection = client.db("foodDB").collection("foods");
     const foodPurchase = client.db("foodDB").collection("foodPurchase");
-    const feedbackCollection = client.db("foodDB").collection("feedbackCollection");
+    const feedbackCollection = client
+      .db("foodDB")
+      .collection("feedbackCollection");
 
     app.post("/addfood", async (req, res) => {
       const newFood = req.body;
@@ -46,7 +48,11 @@ async function run() {
       const result = await feedbackCollection.insertOne(newFeedback);
       res.send(result);
     });
-
+    app.get("/addfeedback", async (req, res) => {
+      const cursor = feedbackCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
     app.get("/addfood", async (req, res) => {
       const cursor = foodCollection.find();
       const result = await cursor.toArray();
