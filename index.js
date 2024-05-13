@@ -34,10 +34,16 @@ async function run() {
     //start
     const foodCollection = client.db("foodDB").collection("foods");
     const foodPurchase = client.db("foodDB").collection("foodPurchase");
+    const feedbackCollection = client.db("foodDB").collection("feedbackCollection");
 
     app.post("/addfood", async (req, res) => {
       const newFood = req.body;
       const result = await foodCollection.insertOne(newFood);
+      res.send(result);
+    });
+    app.post("/addfeedback", async (req, res) => {
+      const newFeedback = req.body;
+      const result = await feedbackCollection.insertOne(newFeedback);
       res.send(result);
     });
 
