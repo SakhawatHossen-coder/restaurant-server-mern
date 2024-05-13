@@ -64,6 +64,16 @@ async function run() {
       const result = await foodCollection.findOne(query);
       res.send(result);
     });
+    app.get("/addfood/email/:email", async (req, res) => {
+      console.log(req.params.email);
+      const result = await foodCollection
+        .find({
+          email: req.params.email,
+        })
+        .toArray();
+      console.log(result);
+      res.send(result);
+    });
     app.post("/purchasefood", async (req, res) => {
       const newFood = req.body;
       const result = await foodPurchase.insertOne(newFood);
@@ -73,6 +83,31 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await foodCollection.findOne(query);
+      res.send(result);
+    });
+    app.put("/addfood/:id", async (req, res) => {
+      let id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      // const option = { upsert: true };
+      const updateFood = req.body;
+      const newFood = {
+        $set: {
+          foodimage: updateFood.foodimage,
+          foodname: updateFood.foodname,
+          foodcategory: updateFood.foodcategory,
+          price: updateFood.price,
+          description: updateFood.description,
+          quantity: updateFood.quantity,
+          country: updateFood.country,
+        },
+      };
+      const result = await foodCollection.updateOne(filter, newFood);
+      res.send(result);
+    });
+    app.delete("/addfood/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodCollection.deleteOne(query);
       res.send(result);
     });
     // comment
