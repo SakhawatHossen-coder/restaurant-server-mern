@@ -65,7 +65,7 @@ async function run() {
       res.send(result);
     });
     app.get("/addfood/email/:email", async (req, res) => {
-      console.log(req.params.email);
+      // console.log(req.params.email);
       const result = await foodCollection
         .find({
           email: req.params.email,
@@ -77,6 +77,16 @@ async function run() {
     app.post("/purchasefood", async (req, res) => {
       const newFood = req.body;
       const result = await foodPurchase.insertOne(newFood);
+      res.send(result);
+    });
+    app.get("/purchasefood/email/:email", async (req, res) => {
+      console.log(req.params.email);
+      const result = await foodPurchase
+        .find({
+          buyeremail: req.params.email,
+        })
+        .toArray();
+      // console.log(result);
       res.send(result);
     });
     app.get("/purchasefood/:id", async (req, res) => {
