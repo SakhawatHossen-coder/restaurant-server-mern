@@ -71,7 +71,7 @@ async function run() {
           email: req.params.email,
         })
         .toArray();
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
     app.post("/purchasefood", async (req, res) => {
