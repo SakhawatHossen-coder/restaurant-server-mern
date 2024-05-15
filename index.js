@@ -1,3 +1,16 @@
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+require("dotenv").config();
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const port = process.env.PORT || 5000;
+const corsOptions = {
+  origin: ["https://wandering-fork.netlify.app"],
+  credentials: true,
+  optionSuccessStatus: 200,
+};
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
   // CORS headers
@@ -13,15 +26,6 @@ app.use((req, res, next) => {
   }
   return next();
 });
-
-const express = require("express");
-const app = express();
-const cors = require("cors");
-const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
-require("dotenv").config();
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const port = process.env.PORT || 5000;
 
 const logger = async (req, res, next) => {
   console.log("log: info", req.method, req.url);
@@ -44,12 +48,12 @@ const verifyToken = async (req, res, next) => {
   });
 };
 
-const corsOptions = {
-  origin: ["https://wandering-fork.netlify.app"],
-  credentials: true,
-  optionSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+// const corsOptions = {
+//   origin: ["https://wandering-fork.netlify.app"],
+//   credentials: true,
+//   optionSuccessStatus: 200,
+// };
+// app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
