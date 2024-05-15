@@ -1,10 +1,26 @@
+app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  // CORS headers
+  res.header("Access-Control-Allow-Origin", "CLIENT SIDE LINK"); // restrict it to the required domain
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+  // Set custom headers for CORS
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-type,Accept,X-Custom-Header"
+  );
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  return next();
+});
+
 const express = require("express");
 const app = express();
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 
 const logger = async (req, res, next) => {
@@ -29,11 +45,7 @@ const verifyToken = async (req, res, next) => {
 };
 
 const corsOptions = {
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "https://wandering-fork.netlify.app",
-  ],
+  origin: ["https://wandering-fork.netlify.app"],
   credentials: true,
   optionSuccessStatus: 200,
 };
