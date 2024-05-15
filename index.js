@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
-const logger = async(req, res, next) => {
+const logger = async (req, res, next) => {
   console.log("log: info", req.method, req.url);
   next();
 };
@@ -29,7 +29,11 @@ const verifyToken = async (req, res, next) => {
 };
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:5174", ""],
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://wandering-fork.netlify.app",
+  ],
   credentials: true,
   optionSuccessStatus: 200,
 };
@@ -72,12 +76,12 @@ async function run() {
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
-      // res
-      //   .cookie("token", token, {
-      //     httpOnly: true,
-      //     secure: false,
-      //     sameSite: "none",
-      //   })
+        // res
+        //   .cookie("token", token, {
+        //     httpOnly: true,
+        //     secure: false,
+        //     sameSite: "none",
+        //   })
         .send({ success: true });
     });
     //
