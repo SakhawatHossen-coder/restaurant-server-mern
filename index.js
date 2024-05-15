@@ -7,6 +7,27 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
+const logger = async(req, res, next) => {
+  console.log("log: info", req.method, req.url);
+  next();
+};
+const verifyToken = async (req, res, next) => {
+  const token = req?.cookies?.token;
+  // console.log('token in the middleware', token);
+  // no token available
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      console.log(err);
+      return res.status(401).send({ message: "unauthorized access" });
+    }
+    req.user = decoded;
+    next();
+  });
+};
+
 const corsOptions = {
   origin: ["http://localhost:5173", "http://localhost:5174", ""],
   credentials: true,
@@ -38,6 +59,29 @@ async function run() {
       .db("foodDB")
       .collection("feedbackCollection");
 
+    //jwt
+    app.post("/jwt", logger, async (req, res) => {
+      let user = req.body;
+      console.log("token for", user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "365d",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+      // res
+      //   .cookie("token", token, {
+      //     httpOnly: true,
+      //     secure: false,
+      //     sameSite: "none",
+      //   })
+        .send({ success: true });
+    });
+    //
+
     app.post("/addfood", async (req, res) => {
       const newFood = req.body;
       const result = await foodCollection.insertOne(newFood);
@@ -53,8 +97,34 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
-    app.get("/addfood", async (req, res) => {
-      const cursor = foodCollection.find().sort({ purchaseCount: -1 });
+
+    app.get("/addfood", logger, async (req, res) => {
+      const searchTerm = req.query.term || ""; // Get search term from query parameter
+      const regex = new RegExp(searchTerm, "i");
+
+      let query = {
+        foodname: { $regex: regex },
+      };
+      let options = {};
+
+      const cursor = foodCollection
+        .find(query, options)
+        .sort({ purchaseCount: -1 });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/searchfood", async (req, res) => {
+      const searchTerm = req.query.term || ""; // Get search term from query parameter
+      const regex = new RegExp(searchTerm, "i");
+      const search = req.query.search || "";
+      let query = {
+        foodname: { $regex: search, $options: "i" },
+      };
+      // if (filter) query.category = filter;
+      let options = {};
+      // Case-insensitive search
+      const cursor = foodCollection.find(query, options);
       const result = await cursor.toArray();
       res.send(result);
     });
