@@ -54,7 +54,7 @@ async function run() {
       res.send(result);
     });
     app.get("/addfood", async (req, res) => {
-      const cursor = foodCollection.find();
+      const cursor = foodCollection.find().sort({ purchaseCount: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -76,9 +76,21 @@ async function run() {
     });
     app.post("/purchasefood", async (req, res) => {
       const newFood = req.body;
-      const result = await foodPurchase.insertOne(newFood);
+      const result = await foodPurchase.insertOne(newFood, {
+        purchaseCount: 0,
+      });
       res.send(result);
     });
+    // app.post("/purchasefood", async (req, res) => {
+    //   const newFood = req.body;
+    //   const result = await foodPurchase.findOneAndUpdate(newFood, {
+    //     $inc: { purchaseCount: 1 },
+    //   });
+    //   res.send(result);
+    // });
+    //  { $inc: { purchaseCount: 1 } }, // Increment purchaseCount by 1
+    //   { new: true }
+
     app.get("/purchasefood/email/:email", async (req, res) => {
       console.log(req.params.email);
       const result = await foodPurchase
@@ -92,7 +104,9 @@ async function run() {
     app.get("/purchasefood/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await foodCollection.findOne(query);
+      const result = await foodCollection.findOneAndUpdate(query, {
+        $inc: { purchaseCount: 1 },
+      });
       res.send(result);
     });
     app.put("/addfood/:id", async (req, res) => {
@@ -114,10 +128,10 @@ async function run() {
       const result = await foodCollection.updateOne(filter, newFood);
       res.send(result);
     });
-    app.delete("/addfood/:id", async (req, res) => {
+    app.delete("/purchasefood/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await foodCollection.deleteOne(query);
+      const result = await foodPurchase.deleteOne(query);
       res.send(result);
     });
     // comment
