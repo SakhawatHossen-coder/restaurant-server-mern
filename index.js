@@ -7,14 +7,18 @@ require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 const corsOptions = {
-  origin: ["https://wandering-fork.netlify.app"],
+  origin: ["https://wandering-fork.netlify.app", "http://localhost:5173"],
   credentials: true,
   optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 app.use((req, res, next) => {
   // CORS headers
-  res.header("Access-Control-Allow-Origin", "CLIENT SIDE LINK"); // restrict it to the required domain
+  res.header(
+    "Access-Control-Allow-Origin",
+    // "https://wandering-fork.netlify.app",
+    "http://localhost:5173"
+  ); // restrict it to the required domain
   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
   // Set custom headers for CORS
   res.header(
@@ -49,7 +53,7 @@ const verifyToken = async (req, res, next) => {
 };
 
 // const corsOptions = {
-//   origin: ["https://wandering-fork.netlify.app"],
+//   origin: ["https://wandering-fork.netlify.app", "http://localhost:5173"],
 //   credentials: true,
 //   optionSuccessStatus: 200,
 // };
@@ -70,36 +74,41 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    //     await client.connect();
     //start
     const foodCollection = client.db("foodDB").collection("foods");
     const foodPurchase = client.db("foodDB").collection("foodPurchase");
     const feedbackCollection = client
       .db("foodDB")
       .collection("feedbackCollection");
-
+    // const cookieOptions = {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    // };
     //jwt
-    app.post("/jwt", logger, async (req, res) => {
-      let user = req.body;
-      console.log("token for", user);
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "365d",
-      });
-      res
-        .cookie("token", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-        })
-        // res
-        //   .cookie("token", token, {
-        //     httpOnly: true,
-        //     secure: false,
-        //     sameSite: "none",
-        //   })
-        .send({ success: true });
-    });
+    // app.post("/jwt",  async (req, res) => {
+    //   let user = req.body;
+    //   console.log("token for", user);
+    //   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+    //     expiresIn: "365d",
+    //   });
+    //   res
+    //     .cookie("token", token, cookieOptions)
+    //     // res
+    //     //   .cookie("token", token, {
+    //     //     httpOnly: true,
+    //     //     secure: false,
+    //     //     sameSite: "none",
+    //     //   })
+    //     .send({ success: true });
+    // });
+    // app.post("/logout", async (req, res) => {
+    //   const user = req.body;
+    //   console.log("logging out", user);
+    //   res
+    //     .clearCookie("token", { ...cookieOptions, maxAge: 0 })
+    //     .send({ success: true });
+    // });
     //
 
     app.post("/addfood", async (req, res) => {
@@ -118,8 +127,8 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/addfood", logger, async (req, res) => {
-      const searchTerm = req.query.term || ""; // Get search term from query parameter
+    app.get("/addfood", async (req, res) => {
+      const searchTerm = req.query.seacrh || ""; // Get search term from query parameter
       const regex = new RegExp(searchTerm, "i");
 
       let query = {
@@ -138,8 +147,10 @@ async function run() {
       const searchTerm = req.query.term || ""; // Get search term from query parameter
       const regex = new RegExp(searchTerm, "i");
       const search = req.query.search || "";
+      const filter = req.query;
+      // console.log(filter)
       let query = {
-        foodname: { $regex: search, $options: "i" },
+        foodname: { $regex: filter.searchTerm, $options: "i" },
       };
       // if (filter) query.category = filter;
       let options = {};
@@ -224,15 +235,14 @@ async function run() {
       const result = await foodPurchase.deleteOne(query);
       res.send(result);
     });
+    app.delete("/addfood/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foodCollection.deleteOne(query);
+      res.send(result);
+    });
     // comment
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
   } finally {
-    // Ensures that the client will close when you finish/error
-    //     await client.close();
   }
 }
 run().catch(console.dir);
