@@ -128,17 +128,17 @@ async function run() {
     });
 
     app.get("/addfood", async (req, res) => {
-      const searchTerm = req.query.seacrh || ""; // Get search term from query parameter
+      const searchTerm = req.query.term || ""; // Get search term from query parameter
       const regex = new RegExp(searchTerm, "i");
+      const filter = req.query;
 
-      let query = {
-        foodname: { $regex: regex },
-      };
+      // let query = {
+      //   foodname: { $regex: filter.searchTerm, $options: "i" },
+      // };
+      // if (filter) query.category = filter;
       let options = {};
 
-      const cursor = foodCollection
-        .find(query, options)
-        .sort({ purchaseCount: -1 });
+      const cursor = foodCollection.find().sort({ purchaseCount: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
