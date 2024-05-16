@@ -16,8 +16,8 @@ app.use((req, res, next) => {
   // CORS headers
   res.header(
     "Access-Control-Allow-Origin",
-    // "https://wandering-fork.netlify.app",
-    "http://localhost:5173"
+    "https://wandering-fork.netlify.app",
+    // "http://localhost:5173"
   ); // restrict it to the required domain
   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
   // Set custom headers for CORS
